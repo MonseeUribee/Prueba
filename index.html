@@ -1,3 +1,10 @@
+<!--                   Tarea 1.1      
+       El Sol y la Luna usando PlayCanvas como librería gráfica
+       
+       Equipo:
+       Cámara Gamboa Valeria Itzel
+       Uribe Chávez Montserrat del Carmen
+-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,7 +27,7 @@
     app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
     app.setCanvasResolution(pc.RESOLUTION_AUTO);
 
-    // Crear cámara
+    // Crear cámara - enfoque de visualización y fondo
     
     var camera = new pc.Entity("camera");
     camera.addComponent("camera", {
@@ -29,7 +36,7 @@
     camera.setPosition(0, 0, 15); //profundidad del fondo
     app.root.addChild(camera);
 
-    // Crear luz y sombra
+    // Crear luz y sombra 
     
     var light = new pc.Entity("light");
     light.addComponent("light", {
@@ -38,10 +45,9 @@
         castShadows: true,
         shadowDistance: 50 //se ve rarito, con 20 no se mueve
     });
-    //light.setEulerAngles(45, 30, 0);
     app.root.addChild(light);
 
- // Crear luna usando esfera
+ // Crear Luna usando esfera
  
     var luna = new pc.Entity("luna");
     luna.addComponent("model", {
@@ -49,7 +55,7 @@
     });  
     app.root.addChild(luna);
     
-   // color de la luna
+   // color de la Luna
    
     var materialLuna = new pc.StandardMaterial();
     materialLuna.diffuse = new pc.Color(0.9, 0.9, 0.8);
@@ -65,7 +71,7 @@
     });
     app.root.addChild(sol);
    
-   // color del sol
+   // color del Sol
    
     var materialSol = new pc.StandardMaterial();
     materialSol.diffuse = new pc.Color(1, 0.9, 0); // color amarillento
@@ -87,11 +93,11 @@
     //color
 
     var material = new pc.StandardMaterial();
-   material.diffuse = new pc.Color(0, 0.3, 0.8); // azul marino
+    material.diffuse = new pc.Color(0, 0.3, 0.8); // azul marino
     material.update();
     mar.model.material = material;
 
-    // Variables del movimiento parabólico
+    // Variables del movimiento parabólico (una curva)
     
     var t = 0; //contador para iniciar tiempo
     var vx = 0.5;   // velocidad horizontal lenta , con 5 es más rápida
@@ -120,15 +126,17 @@
           
         if (t < mitadCiclo) {
               
-            // Día mostrar sol
+            // Día mostrar Sol
             
             camera.camera.clearColor = new pc.Color(0.53, 0.81, 0.98); // azul claro
             sol.setPosition(x, y, 0);
+             // Rotación del sol (sobre su propio eje)
+            sol.rotate(0, 10 * dt, 0); // Rotación lenta en el eje Y
             luna.setPosition(100, 100, 100); // Fuera de vista
-            
-            // Mar color azul claro
-            
-            light.light.color = new pc.Color(0, 0.3, 0.8);
+            light.light.castShadows = true // Se le devuelve la sombra al Sol
+            sol.rotate(10 * dt, 25 * dt, 15 * dt); // Rotación solar 
+            light.light.color = new pc.Color(1, 1, 0.9);  // Mar color azul claro
+            light.light.intensity = 2.5;   // Ajustar luz
             
         } else {
             
@@ -138,9 +146,10 @@
             luna.setPosition(x, y, 0);
             sol.setPosition(100, 100, 100); // Fuera de vista
             light.light.castShadows = false //la Luna no tiene sombra
+            light.light.color = new pc.Color(0.024, 0.024, 0.412); // Mar color azul oscuro
+            luna.rotate(10 * dt, 25 * dt, 15 * dt);  //Rotación lunar 
+            light.light.intensity = 3.5;   // Ajustar luz
             
-                // Mar color azul oscuro
-            light.light.color = new pc.Color(0.024, 0.024, 0.412);
         }
         
     });
