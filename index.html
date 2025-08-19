@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PlayCanvas Rotating Cube</title>
+    <script src="https://code.playcanvas.com/playcanvas-stable.min.js"></script>
+</head>
+<body>
+<canvas id="application"></canvas>
+<script>
+
+    // Crear la app
+    
+    var canvas = document.getElementById("application");
+    var app = new pc.Application(canvas, {});
+    app.start();
+
+    // Ajustar tamaño al canvas
+    
+    app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+    app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+    // Crear cámara
+    
+    var camera = new pc.Entity("camera");
+    camera.addComponent("camera", {
+        clearColor: new pc.Color(0,0,0) //color negro
+    });
+    camera.setPosition(0, 0, 15); //profundidad del fondo
+    app.root.addChild(camera);
+
+    // Crear luz y sombra
+    
+    var light = new pc.Entity("light");
+    light.addComponent("light", {
+        type: "directional",
+        color: new pc.Color(1, 1, 1),
+        castShadows: true,
+        shadowDistance: 50 //se ve rarito, con 20 no se mueve
+    });
+    //light.setEulerAngles(45, 30, 0);
+    app.root.addChild(light);
+
+ // Crear luna usando esfera
+ 
+    var luna = new pc.Entity("luna");
+    luna.addComponent("model", {
+    type: "sphere"
+    });  
+    app.root.addChild(luna);
+    
+   // color de la luna
+   
+    var materialLuna = new pc.StandardMaterial();
+    materialLuna.diffuse = new pc.Color(0.9, 0.9, 0.8);
+    materialLuna.emissive = new pc.Color(0.2, 0.2, 0.2); //difumina la parte negra
+    materialLuna.update();
+    luna.model.material = materialLuna;
+
+ // Crear Sol usando esfera
+
+    var sol = new pc.Entity("sol");
+    sol.addComponent("model", {
+    type: "sphere"
+    });
+    app.root.addChild(sol);
+   
+   // color del sol
+   
+    var materialSol = new pc.StandardMaterial();
+    materialSol.diffuse = new pc.Color(1, 0.9, 0); // color amarillento
+    materialSol.emissive = new pc.Color(1, 0.8, 0); //difumina la parte negra
+    materialSol.update();
+    sol.model.material = materialSol;
+ 
+  // Crear mar
+    var mar = new pc.Entity("mar");
+    mar.addComponent("model", { 
+    type: "plane" 
+    
+    });
+    app.root.addChild(mar);
+    mar.setLocalScale(20, 1, 20);        
+    mar.setLocalPosition(0, -3, 0);      
+    mar.setLocalEulerAngles(20, 0, 0);   //  rotación para que se vea como piso
+    
+    //color
+
+    var material = new pc.StandardMaterial();
+   material.diffuse = new pc.Color(0, 0.3, 0.8); // azul marino
+    material.update();
+    mar.model.material = material;
+
+    // Variables del movimiento parabólico
+    
+    var t = 0; //contador para iniciar tiempo
+    var vx = 0.5;   // velocidad horizontal lenta , con 5 es más rápida
+    var vy = 5;  // velocidad vertical inicial
+    var g = 9.8;  // gravedad 
+
+    var cicloDuracion = 30; // duración total del ciclo día/noche en segundos
+    var mitadCiclo = 15;
+    
+    app.on("update", function(dt) {
+        t += dt;
+        
+        // Reiniciar el ciclo
+        
+        if (t > cicloDuracion) {
+            t = 0;
+        }
+        
+        // Movimiento parabólico 
+        
+        var progreso = t / cicloDuracion; // 0 a 1
+        var x = -10 + 20 * progreso; // De -10 a 10 en X
+        var y = 5 * Math.sin(progreso * Math.PI); // Movimiento sinusoidal suave
+        
+        // Alternar entre día y noche
+          
+        if (t < mitadCiclo) {
+              
+            // Día mostrar sol
+            
+            camera.camera.clearColor = new pc.Color(0.53, 0.81, 0.98); // azul claro
+            sol.setPosition(x, y, 0);
+            luna.setPosition(100, 100, 100); // Fuera de vista
+            
+            // Mar color azul claro
+            
+            light.light.color = new pc.Color(0, 0.3, 0.8);
+            
+        } else {
+            
+            // Noche  mostrar luna
+            
+            camera.camera.clearColor = new pc.Color(0, 0, 0.1); // azul noche oscuro
+            luna.setPosition(x, y, 0);
+            sol.setPosition(100, 100, 100); // Fuera de vista
+            light.light.castShadows = false //la Luna no tiene sombra
+            
+                // Mar color azul oscuro
+            light.light.color = new pc.Color(0.024, 0.024, 0.412);
+        }
+        
+    });
+
+</script>
+</body>
+</html>
